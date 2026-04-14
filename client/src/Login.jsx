@@ -1,55 +1,46 @@
 import { useState } from "react";
 import axios from "axios";
 
-function App() {
-  const [name, setName] = useState("");
+function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleRegister = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://127.0.0.1:5000/register", {
-        name,
+      const response = await axios.post("http://127.0.0.1:5000/login", {
         email,
         password,
       });
       alert(response.data.message);
-      window.location.href = "/login";
+      // Success hone par user details local storage mein save karein
+      localStorage.setItem("user", JSON.stringify(response.data));
+      window.location.href = "/dashboard";
     } catch (err) {
-      alert(err.response?.data?.error || "Registration failed!");
+      alert(err.response?.data?.error || "Login fail ho gaya!");
     }
   };
 
   return (
     <div style={styles.container}>
-      {/* Animated Background Layers */}
+      {/* Background Decorative Circles */}
       <div style={styles.bgCircle1}></div>
       <div style={styles.bgCircle2}></div>
 
       <div style={styles.glassBox}>
         <div style={{ textAlign: "center", marginBottom: "30px" }}>
-          <h1 style={styles.title}>Join SkillSwap 🚀</h1>
-          <p style={styles.subtitle}>Sikho aur Sikhao. Grow together.</p>
+          <h1 style={styles.title}>Welcome Back 🔑</h1>
+          <p style={styles.subtitle}>
+            Log in to continue your SkillSwap journey.
+          </p>
         </div>
 
-        <form onSubmit={handleRegister} style={styles.form}>
-          <div style={styles.inputWrapper}>
-            <label style={styles.label}>Full Name</label>
-            <input
-              type="text"
-              placeholder="e.g. Raj Shirke"
-              onChange={(e) => setName(e.target.value)}
-              style={styles.input}
-              required
-            />
-          </div>
-
+        <form onSubmit={handleLogin} style={styles.form}>
           <div style={styles.inputWrapper}>
             <label style={styles.label}>Email Address</label>
             <input
               type="email"
-              placeholder="name@gmail.com"
+              placeholder="Enter your email"
               onChange={(e) => setEmail(e.target.value)}
               style={styles.input}
               required
@@ -67,15 +58,15 @@ function App() {
             />
           </div>
 
-          <button type="submit" style={styles.registerBtn}>
-            Create Account ✨
+          <button type="submit" style={styles.loginBtn}>
+            Login to Dashboard 🚀
           </button>
         </form>
 
         <p style={styles.footerText}>
-          Already have an account?{" "}
-          <a href="/login" style={styles.link}>
-            Login here
+          Don't have an account?{" "}
+          <a href="/" style={styles.link}>
+            Register Now
           </a>
         </p>
       </div>
@@ -85,7 +76,7 @@ function App() {
 
 const styles = {
   container: {
-    background: "#0f172a",
+    background: "#0f172a", // Match with Register Page
     minHeight: "100vh",
     display: "flex",
     alignItems: "center",
@@ -96,90 +87,90 @@ const styles = {
   },
   bgCircle1: {
     position: "absolute",
-    top: "-10%",
-    left: "-5%",
-    width: "500px",
-    height: "500px",
-    background: "rgba(100, 108, 255, 0.15)",
+    top: "-5%",
+    right: "-5%",
+    width: "450px",
+    height: "450px",
+    background: "rgba(100, 108, 255, 0.12)",
     borderRadius: "50%",
     filter: "blur(100px)",
     zIndex: 0,
   },
   bgCircle2: {
     position: "absolute",
-    bottom: "0%",
-    right: "0%",
-    width: "400px",
-    height: "400px",
-    background: "rgba(156, 39, 176, 0.15)",
+    bottom: "-10%",
+    left: "-10%",
+    width: "500px",
+    height: "500px",
+    background: "rgba(156, 39, 176, 0.12)",
     borderRadius: "50%",
     filter: "blur(100px)",
     zIndex: 0,
   },
   glassBox: {
     width: "100%",
-    maxWidth: "450px",
+    maxWidth: "420px",
     background: "rgba(255, 255, 255, 0.03)",
-    backdropFilter: "blur(20px)",
-    padding: "40px",
-    borderRadius: "28px",
-    border: "1px solid rgba(255, 255, 255, 0.1)",
-    boxShadow: "0 25px 50px rgba(0,0,0,0.3)",
+    backdropFilter: "blur(25px)",
+    padding: "45px",
+    borderRadius: "30px",
+    border: "1px solid rgba(255, 255, 255, 0.08)",
+    boxShadow: "0 20px 60px rgba(0,0,0,0.4)",
     zIndex: 10,
   },
   title: {
     color: "#fff",
-    fontSize: "2.2rem",
-    margin: "0 0 10px",
+    fontSize: "2rem",
+    margin: "0 0 8px",
     fontWeight: "700",
-    background: "linear-gradient(to right, #646cff, #9c27b0)",
+    background: "linear-gradient(to right, #6e8efb, #a777e3)",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
   },
-  subtitle: { color: "rgba(255,255,255,0.6)", fontSize: "1rem", margin: 0 },
+  subtitle: { color: "rgba(255,255,255,0.5)", fontSize: "0.95rem", margin: 0 },
   form: {
     display: "flex",
     flexDirection: "column",
-    gap: "20px",
-    marginTop: "30px",
+    gap: "22px",
+    marginTop: "35px",
   },
-  inputWrapper: { display: "flex", flexDirection: "column", gap: "8px" },
+  inputWrapper: { display: "flex", flexDirection: "column", gap: "10px" },
   label: {
-    color: "rgba(255,255,255,0.8)",
-    fontSize: "0.9rem",
+    color: "rgba(255,255,255,0.7)",
+    fontSize: "0.85rem",
     fontWeight: "500",
     marginLeft: "5px",
   },
   input: {
     padding: "14px",
-    borderRadius: "12px",
-    background: "rgba(255,255,255,0.05)",
+    borderRadius: "15px",
+    background: "rgba(255,255,255,0.06)",
     border: "1px solid rgba(255,255,255,0.1)",
     color: "#fff",
     fontSize: "1rem",
     outline: "none",
     transition: "0.3s",
   },
-  registerBtn: {
-    background: "linear-gradient(135deg, #646cff 0%, #9c27b0 100%)",
+  loginBtn: {
+    background: "linear-gradient(135deg, #6e8efb 0%, #a777e3 100%)",
     color: "#fff",
     border: "none",
     padding: "16px",
-    borderRadius: "12px",
+    borderRadius: "15px",
     fontSize: "1.1rem",
     fontWeight: "700",
     cursor: "pointer",
-    boxShadow: "0 10px 20px rgba(100, 108, 255, 0.3)",
-    marginTop: "10px",
-    transition: "0.3s",
+    boxShadow: "0 10px 25px rgba(110, 142, 251, 0.3)",
+    marginTop: "12px",
+    transition: "0.4s",
   },
   footerText: {
     textAlign: "center",
-    color: "rgba(255,255,255,0.5)",
-    marginTop: "25px",
+    color: "rgba(255,255,255,0.4)",
+    marginTop: "30px",
     fontSize: "0.9rem",
   },
-  link: { color: "#646cff", textDecoration: "none", fontWeight: "600" },
+  link: { color: "#6e8efb", textDecoration: "none", fontWeight: "600" },
 };
 
-export default App;
+export default Login;
