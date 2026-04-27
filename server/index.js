@@ -20,12 +20,12 @@ app.use(express.json());
 // 1. MongoDB Connection
 mongoose
   .connect("mongodb://localhost:27017/skillswap_db")
-  .then(() => console.log("✅ MongoDB Connect ho gaya!"))
+  .then(() => console.log("✅ MongoDB Connected!"))
   .catch((err) => console.log("❌ Connection mein gadbad hai:", err));
 
 // 2. Default Route
 app.get("/", (req, res) => {
-  res.send("SkillSwap Server chal raha hai! 🚀");
+  res.send("SkillSwap Server is working ! 🚀");
 });
 
 // 3. Register Route
@@ -35,11 +35,11 @@ app.post("/register", async (req, res) => {
     if (!name || !email || !password) {
       return res
         .status(400)
-        .json({ error: "Saari details bharna zaroori hai!" });
+        .json({ error: " All the details must be filled !" });
     }
     const newUser = new User({ name, email, password });
     await newUser.save();
-    res.status(201).json({ message: "User Register ho gaya! ✅" });
+    res.status(201).json({ message: "User Registered! ✅" });
   } catch (err) {
     console.error("DEBUG ERROR ==>", err);
     res.status(500).json({ error: err.message });
@@ -54,21 +54,19 @@ app.post("/login", async (req, res) => {
     if (!user) {
       return res
         .status(400)
-        .json({ error: "User nahi mila! Pehle Register karein." });
+        .json({ error: "User not found ! First Register yourself ." });
     }
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res
-        .status(400)
-        .json({ error: "Galat Password! Dubara koshish karein." });
+      return res.status(400).json({ error: " Wrong Password!Try Again." });
     }
     res.status(200).json({
-      message: "Login Safal raha! Welcome back, " + user.name,
+      message: "Login Sucessfull ! Welcome back, " + user.name,
       userId: user._id,
     });
   } catch (err) {
     console.error("LOGIN ERROR ==>", err);
-    res.status(500).json({ error: "Server mein kuch gadbad hai." });
+    res.status(500).json({ error: "Something went wrong in the server." });
   }
 });
 
@@ -82,15 +80,17 @@ app.post("/update-skills", async (req, res) => {
       { new: true },
     );
     if (!updatedUser) {
-      return res.status(404).json({ error: "User nahi mila!" });
+      return res.status(404).json({ error: "User not found!" });
     }
     res.status(200).json({
-      message: "Skills update ho gayi! ✅",
+      message: "Skills updated ! ✅",
       user: updatedUser,
     });
   } catch (err) {
     console.error("UPDATE SKILLS ERROR ==>", err);
-    res.status(500).json({ error: "Skills save karne mein problem aayi." });
+    res
+      .status(500)
+      .json({ error: "Something went wrong while saving the Skills." });
   }
 });
 
@@ -108,11 +108,23 @@ app.get("/find-matches/:userId", async (req, res) => {
     res.status(200).json(matches);
   } catch (err) {
     console.error("MATCHING ERROR ==>", err);
-    res.status(500).json({ error: "Matching mein kuch issue hai" });
+    res.status(500).json({ error: "Matching issue" });
   }
 });
 
-// 7. Update User Profile Route (Naya Add kiya gaya)
+// 7. NEW: Get All Users Route (For Explore Page)
+app.get("/all-users", async (req, res) => {
+  try {
+    // Sirf wahi data fetch kar rahe hain jo UI mein zaroori hai (Password hide kiya hai)
+    const users = await User.find({}, "name email skillsHave skillsWant");
+    res.status(200).json(users);
+  } catch (err) {
+    console.error("ALL USERS FETCH ERROR ==>", err);
+    res.status(500).json({ error: "Data fetching failed" });
+  }
+});
+
+// 8. Update User Profile Route
 app.post("/update-profile", async (req, res) => {
   try {
     const { userId, name, email, password } = req.body;
@@ -143,7 +155,7 @@ app.post("/update-profile", async (req, res) => {
   }
 });
 
-// 8. Server Start
+// 9. Server Start
 const PORT = 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Server http://localhost:${PORT} par start ho gaya`);
