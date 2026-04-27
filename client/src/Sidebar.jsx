@@ -2,8 +2,6 @@ import { Link, useLocation } from "react-router-dom";
 
 function Sidebar() {
   const location = useLocation();
-
-  // Check karne ke liye ki kaunsa page active hai
   const isActive = (path) => location.pathname === path;
 
   return (
@@ -17,19 +15,17 @@ function Sidebar() {
         >
           🏠 Dashboard
         </Link>
-
         <Link
           to="/explore"
           style={isActive("/explore") ? styles.activeLink : styles.link}
         >
-          🔍 Explore Partners
+          🔍 Explore
         </Link>
-
         <Link
           to="/profile"
           style={isActive("/profile") ? styles.activeLink : styles.link}
         >
-          👤 My Profile
+          👤 Profile
         </Link>
       </nav>
 
@@ -50,9 +46,7 @@ const styles = {
   sidebar: {
     width: "260px",
     height: "100vh",
-    background: "rgba(255, 255, 255, 0.03)",
-    backdropFilter: "blur(15px)", // Glass effect
-    borderRight: "1px solid rgba(255, 255, 255, 0.1)",
+    background: "#020617", // Pure Dark background
     display: "flex",
     flexDirection: "column",
     position: "fixed",
@@ -63,47 +57,33 @@ const styles = {
   },
   logo: {
     color: "#646cff",
-    marginBottom: "50px",
+    marginBottom: "40px",
     fontWeight: "800",
     textAlign: "center",
     fontSize: "1.8rem",
   },
-  navStack: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "12px",
-    flex: 1,
-  },
+  navStack: { display: "flex", flexDirection: "column", gap: "10px", flex: 1 },
   link: {
     textDecoration: "none",
     color: "rgba(255,255,255,0.6)",
-    padding: "14px 20px",
-    borderRadius: "12px",
-    transition: "0.3s ease",
-    fontSize: "1rem",
-    fontWeight: "500",
+    padding: "12px 20px",
+    borderRadius: "10px",
   },
   activeLink: {
     textDecoration: "none",
     color: "#fff",
-    background: "rgba(100, 108, 255, 0.15)",
-    padding: "14px 20px",
-    borderRadius: "12px",
-    borderLeft: "5px solid #646cff", // Blue indicator
-    fontSize: "1rem",
+    background: "#646cff",
+    padding: "12px 20px",
+    borderRadius: "10px",
     fontWeight: "600",
-    boxShadow: "0 4px 15px rgba(100, 108, 255, 0.1)",
   },
   logoutBtn: {
     background: "transparent",
     color: "#ff4757",
     border: "1px solid #ff4757",
-    padding: "12px",
-    borderRadius: "12px",
+    padding: "10px",
+    borderRadius: "10px",
     cursor: "pointer",
-    fontWeight: "700",
-    transition: "0.3s",
-    marginTop: "20px",
   },
 };
 
