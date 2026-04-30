@@ -1,82 +1,137 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
 import { toast } from "react-toastify";
 import Sidebar from "./Sidebar";
 
 function Profile() {
   const [user, setUser] = useState(null);
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+    profilePic: "",
+  });
 
   useEffect(() => {
     const data = JSON.parse(localStorage.getItem("user"));
-    if (data) setUser(data);
+    if (data) {
+      setUser(data);
+      setFormData({
+        name: data.name || "",
+        email: data.email || "",
+        password: "",
+        profilePic: data.profilePic || "",
+      });
+    } else {
+      window.location.href = "/login";
+    }
   }, []);
 
-  const handleUpdate = async (e) => {
-    e.preventDefault();
-    try {
-      const res = await axios.post("http://127.0.0.1:5000/update-profile", {
-        userId: user.userId,
-        name,
-        email,
-        password,
-      });
-      toast.success("Profile Updated! Reloading...");
-      setTimeout(() => window.location.reload(), 1500);
-    } catch (err) {
-      toast.error("Update failed");
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData({ ...formData, profilePic: reader.result });
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  if (!user) return null;
+  // UPDATED: handleSave function with global event dispatch
+  const handleSave = () => {
+    if (!formData.name || !formData.email) {
+      return toast.error("Name and Email are required!");
+    }
+
+    const updatedUser = { ...user, ...formData };
+
+    // Password field empty hai toh use update na karein
+    if (!formData.password) {
+      delete updatedUser.password;
+    }
+
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+    setUser(updatedUser);
+
+    // CRITICAL: Ye line dusre components (Sidebar/Header) ko notify karegi
+    window.dispatchEvent(new Event("storage_update"));
+
+    toast.success("Profile updated successfully! ✨");
+  };
+
+  if (!user) {
+    return (
+      <div style={{ color: "white", padding: "20px" }}>Loading Profile...</div>
+    );
+  }
 
   return (
-    <div
-      style={{
-        display: "flex",
-        background: "#0f172a",
-        minHeight: "100vh",
-        color: "#fff",
-      }}
-    >
+    <div style={styles.container}>
       <Sidebar />
-      <div style={{ marginLeft: "260px", padding: "40px", width: "100%" }}>
-        <h1>My Profile 👤</h1>
-        <div
-          style={{
-            maxWidth: "500px",
-            background: "rgba(255,255,255,0.03)",
-            padding: "30px",
-            borderRadius: "25px",
-            marginTop: "30px",
-          }}
-        >
-          <form
-            onSubmit={handleUpdate}
-            style={{ display: "flex", flexDirection: "column", gap: "20px" }}
-          >
+
+      <div style={styles.mainContent}>
+        <h1 style={styles.pageTitle}>My Profile 👤</h1>
+
+        <div style={styles.profileBox}>
+          <div style={styles.imageUploadSection}>
+            <div style={styles.avatarWrapper}>
+              {formData.profilePic ? (
+                <img
+                  src={formData.profilePic}
+                  alt="Profile"
+                  style={styles.profileImg}
+                />
+              ) : (
+                <div style={styles.initialsAvatar}>
+                  {user?.name ? user.name[0].toUpperCase() : "?"}
+                </div>
+              )}
+              <label htmlFor="file-input" style={styles.editIcon}>
+                📷
+              </label>
+            </div>
             <input
+              id="file-input"
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              style={{ display: "none" }}
+            />
+            <p style={styles.uploadHint}>Click icon to change photo</p>
+          </div>
+
+          <div style={styles.formGroup}>
+            <input
+              type="text"
               placeholder="New Name"
-              onChange={(e) => setName(e.target.value)}
+              value={formData.name}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               style={styles.input}
             />
             <input
+              type="email"
               placeholder="New Email"
-              onChange={(e) => setEmail(e.target.value)}
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
               style={styles.input}
             />
             <input
               type="password"
               placeholder="New Password"
-              onChange={(e) => setPassword(e.target.value)}
+              value={formData.password}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
               style={styles.input}
             />
-            <button type="submit" style={styles.btn}>
+            <button onClick={handleSave} style={styles.saveBtn}>
               Save Changes
             </button>
-          </form>
+          </div>
         </div>
       </div>
     </div>
@@ -84,20 +139,99 @@ function Profile() {
 }
 
 const styles = {
+  container: {
+    display: "flex",
+    minHeight: "100vh",
+    background: "#0b0f1a",
+    color: "#fff",
+  },
+  mainContent: {
+    marginLeft: "280px",
+    padding: "60px",
+    width: "calc(100% - 280px)",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  pageTitle: {
+    fontSize: "2.5rem",
+    marginBottom: "30px",
+    fontWeight: "700",
+    width: "100%",
+    textAlign: "left",
+  },
+  profileBox: {
+    background: "#161b22",
+    padding: "40px",
+    borderRadius: "24px",
+    width: "100%",
+    maxWidth: "500px",
+    border: "1px solid #30363d",
+    textAlign: "center",
+  },
+  imageUploadSection: {
+    marginBottom: "30px",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  avatarWrapper: {
+    position: "relative",
+    width: "120px",
+    height: "120px",
+    borderRadius: "50%",
+    border: "4px solid #646cff",
+    padding: "3px",
+  },
+  profileImg: {
+    width: "100%",
+    height: "100%",
+    borderRadius: "50%",
+    objectFit: "cover",
+  },
+  initialsAvatar: {
+    width: "100%",
+    height: "100%",
+    borderRadius: "50%",
+    background: "#30363d",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    fontSize: "40px",
+    fontWeight: "bold",
+  },
+  editIcon: {
+    position: "absolute",
+    bottom: "5px",
+    right: "5px",
+    background: "#646cff",
+    borderRadius: "50%",
+    width: "32px",
+    height: "32px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: "pointer",
+    fontSize: "16px",
+  },
+  uploadHint: { fontSize: "12px", color: "#94a3b8", marginTop: "10px" },
+  formGroup: { display: "flex", flexDirection: "column", gap: "20px" },
   input: {
-    padding: "12px",
-    borderRadius: "10px",
-    background: "rgba(255,255,255,0.05)",
-    border: "1px solid rgba(255,255,255,0.1)",
+    padding: "14px",
+    borderRadius: "12px",
+    border: "1px solid #30363d",
+    background: "#0b0f1a",
     color: "#fff",
     outline: "none",
+    fontSize: "16px",
   },
-  btn: {
-    padding: "12px",
+  saveBtn: {
+    padding: "16px",
     background: "#646cff",
-    color: "#fff",
     border: "none",
-    borderRadius: "10px",
+    color: "#fff",
+    borderRadius: "12px",
+    fontSize: "16px",
     fontWeight: "bold",
     cursor: "pointer",
   },
