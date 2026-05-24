@@ -1,26 +1,28 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
-// 1. Pehle Schema define karein (Ye zaroori hai!)
+// 1. Schema Definition (With profilePic and array defaults)
 const UserSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
-  skillsHave: [String],
-  skillsWant: [String],
+  skillsHave: { type: [String], default: [] }, // Default empty array zaroori hai
+  skillsWant: { type: [String], default: [] }, // Default empty array zaroori hai
+  profilePic: { type: String, default: "" }, // Added for profile image sync
 });
 
-// 2. Phir pre-save middleware likhein
-UserSchema.pre("save", async function () {
-  if (!this.isModified("password")) return;
+// 2. Pre-save Middleware for Password Hashing
+UserSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) return next(); // next() call karna safe practice hai
 
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
+    next();
   } catch (err) {
-    throw err;
+    next(err);
   }
 });
 
-// 3. Sabse aakhiri mein model export karein
+// 3. Model Export
 module.exports = mongoose.model("User", UserSchema);
